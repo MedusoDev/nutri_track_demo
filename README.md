@@ -4,6 +4,8 @@ A nutrition dashboard screen ("NutriTrack") built with React Native CLI and Type
 
 **Version 0.1.0**
 
+<img src="docs/screenshot.png" alt="NutriTrack dashboard running on Android" width="320">
+
 ## What's in it
 
 - **Header**: today's date, the app name and logo.
