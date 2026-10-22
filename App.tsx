@@ -16,6 +16,9 @@ import { Slide } from './src/components/kit';
 import { TAB_BAR_HEIGHT, TabBar } from './src/components/TabBar';
 import { Toast, ToastMessage } from './src/components/Toast';
 import { MEALS } from './src/data/foods';
+import { FoodDetailScreen } from './src/screens/log/FoodDetailScreen';
+import { LogFoodScreen } from './src/screens/log/LogFoodScreen';
+import { MealDetailScreen } from './src/screens/log/MealDetailScreen';
 import { ForgotPasswordScreen } from './src/screens/onboarding/ForgotPasswordScreen';
 import { LoginScreen } from './src/screens/onboarding/LoginScreen';
 import { OnboardingFlow } from './src/screens/onboarding/OnboardingFlow';
@@ -85,17 +88,16 @@ function Main() {
     const label = (meal: MealType) => MEALS.find(m => m.key === meal)!.label;
     return {
       push: route => {
-        if (
-          route.name === 'createFood' ||
-          route.name === 'logFood' ||
-          route.name === 'foodDetail' ||
-          route.name === 'mealDetail'
-        ) {
+        if (route.name === 'createFood') {
           setToast({
             id: Date.now(),
-            title: 'Logging food comes in the next update',
+            title: 'New food comes in the next update',
           });
           return;
+        }
+        // A new Log food starts with an empty plate.
+        if (route.name === 'logFood') {
+          setPlate([]);
         }
         setStack(s => [...s, { id: Date.now() + Math.random(), route }]);
       },
@@ -303,6 +305,20 @@ function Main() {
     ) => void,
   ) {
     switch (route.name) {
+      case 'logFood':
+        return <LogFoodScreen meal={route.meal} date={route.date} />;
+      case 'foodDetail':
+        return (
+          <FoodDetailScreen
+            food={route.food}
+            meal={route.meal}
+            date={route.date}
+            mode={route.mode}
+            entry={route.entry}
+          />
+        );
+      case 'mealDetail':
+        return <MealDetailScreen meal={route.meal} date={route.date} />;
       case 'day':
         return <TodayScreen date={route.date} highlight={flash} />;
       case 'editProfile':
