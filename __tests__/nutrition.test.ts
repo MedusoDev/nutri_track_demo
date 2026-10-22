@@ -103,3 +103,16 @@ describe('new design helpers', () => {
     expect(Math.round(split.fat)).toBe(30);
   });
 });
+
+describe('meal sky', () => {
+  const { phaseOf, skyIsDark } = require('../src/components/MealSky');
+  test('follows the time of the meal', () => {
+    expect(phaseOf('07:30')).toBe('morning');
+    expect(phaseOf('12:40')).toBe('midday');
+    expect(phaseOf('15:35')).toBe('afternoon');
+    expect(phaseOf('19:10')).toBe('dusk');
+    expect(phaseOf('03:00')).toBe('night');
+    expect(skyIsDark('07:30')).toBe(false);
+    expect(skyIsDark('21:00')).toBe(true);
+  });
+});

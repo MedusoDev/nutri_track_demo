@@ -27,6 +27,8 @@ const light = {
   carbsSoft: '#F1E2B8',
   fatSoft: '#CFE3E1',
   onAccent: '#FFF8F0',
+  lineStrong: '#B3A88F', // darker border for the main cards on Today
+  waterLine: '#8FB0C2',
   shadow: '#1F2A21',
   overlay: 'rgba(18, 26, 20, 0.5)',
 
@@ -66,6 +68,8 @@ const dark: Colors = {
   carbsSoft: '#3A3320',
   fatSoft: '#1F3836',
   onAccent: '#FFF8F0',
+  lineStrong: '#4A5E4F',
+  waterLine: '#3E6476',
   shadow: '#000000',
   overlay: 'rgba(0, 0, 0, 0.6)',
 

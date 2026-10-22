@@ -45,18 +45,18 @@ export function MacroLeaves({ protein, carbs, fat }: Props) {
     const sway = Animated.loop(
       Animated.timing(clock, {
         toValue: 1,
-        duration: 2800,
+        duration: 4200, // slower than the splash (2.8 s): Today should feel calm
         easing: Easing.linear,
         useNativeDriver: true,
       }),
     );
     sway.start();
     Animated.stagger(
-      160,
+      240,
       grow.map(g =>
         Animated.timing(g, {
           toValue: 1,
-          duration: 900,
+          duration: 1200,
           easing: Easing.bezier(0.2, 0.8, 0.2, 1),
           useNativeDriver: true,
         }),
