@@ -16,6 +16,7 @@ import { Slide } from './src/components/kit';
 import { TAB_BAR_HEIGHT, TabBar } from './src/components/TabBar';
 import { Toast, ToastMessage } from './src/components/Toast';
 import { MEALS } from './src/data/foods';
+import { HistoryScreen } from './src/screens/HistoryScreen';
 import { FoodDetailScreen } from './src/screens/log/FoodDetailScreen';
 import { LogFoodScreen } from './src/screens/log/LogFoodScreen';
 import { MealDetailScreen } from './src/screens/log/MealDetailScreen';
@@ -245,7 +246,7 @@ function Main() {
           {tab === 'today' && (
             <TodayScreen date={today} highlight={highlight} />
           )}
-          {tab === 'history' && <ComingNext title="History" />}
+          {tab === 'history' && <HistoryScreen />}
           {tab === 'foods' && <ComingNext title="Foods" />}
           {tab === 'settings' && <ComingNext title="Settings" />}
         </Animated.View>
