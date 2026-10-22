@@ -93,28 +93,46 @@ const num = (v: string) => {
 };
 
 interface Props {
-  onExit: () => void; // back from the first step -> Welcome
-  onDone: (profile: Profile, goals: Goals) => void;
+  onExit: () => void; // back from the first step -> Welcome (or Settings when editing)
+  onDone: (profile: Profile, goals: Goals, hasAccount: boolean) => void;
+  /** Settings -> Edit profile: starts from the saved answers and skips "Save your plan". */
+  initial?: Profile | null;
+  units?: 'kg' | 'lb';
 }
 
-export function OnboardingFlow({ onExit, onDone }: Props) {
+export function OnboardingFlow({
+  onExit,
+  onDone,
+  initial,
+  units = 'kg',
+}: Props) {
+  const editing = !!initial;
+  const lb = units === 'lb';
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
   // ---- answers (kept as text so the fields can be edited freely) ----
   const [step, setStep] = useState<Step>('goal');
-  const [goal, setGoal] = useState<GoalKind>('maintain');
-  const [sex, setSex] = useState<Sex>('male');
-  const [ageS, setAgeS] = useState('29');
+  const [goal, setGoal] = useState<GoalKind>(initial?.goal ?? 'maintain');
+  const [sex, setSex] = useState<Sex>(initial?.sex ?? 'male');
+  const [ageS, setAgeS] = useState(initial ? String(initial.age) : '29');
   const [hUnit, setHUnit] = useState<'cm' | 'ft'>('cm');
-  const [hS, setHS] = useState('178');
+  const [hS, setHS] = useState(
+    initial ? String(Math.round(initial.heightCm)) : '178',
+  );
   const [ftS, setFtS] = useState('5');
   const [inS, setInS] = useState('10');
-  const [wUnit, setWUnit] = useState<'kg' | 'lb'>('kg');
-  const [wS, setWS] = useState('76.0');
-  const [activity, setActivity] = useState(1);
-  const [targetS, setTargetS] = useState('72');
-  const [pace, setPace] = useState(1);
+  const [wUnit, setWUnit] = useState<'kg' | 'lb'>(units);
+  const toUnit = (kg: number) =>
+    lb ? String(Math.round(kg * LB_PER_KG)) : kg.toFixed(1);
+  const [wS, setWS] = useState(
+    initial ? toUnit(initial.weightKg) : lb ? '168' : '76.0',
+  );
+  const [activity, setActivity] = useState(initial?.activity ?? 1);
+  const [targetS, setTargetS] = useState(
+    initial?.targetKg ? toUnit(initial.targetKg) : lb ? '159' : '72',
+  );
+  const [pace, setPace] = useState(initial?.pace ?? 1);
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [showHow, setShowHow] = useState(false);
@@ -209,7 +227,8 @@ export function OnboardingFlow({ onExit, onDone }: Props) {
     return () => clearTimeout(timer);
   }, [step, calcTapped]);
 
-  const finish = () => onDone(profile, goalsFromPlan(plan));
+  const finish = (hasAccount: boolean) =>
+    onDone(profile, goalsFromPlan(plan), hasAccount);
 
   function pickGoal(id: GoalKind) {
     setGoal(id);
@@ -881,9 +900,9 @@ export function OnboardingFlow({ onExit, onDone }: Props) {
           ]}
         >
           <PrimaryButton
-            label="Save my plan"
+            label={editing ? 'Save changes' : 'Save my plan'}
             arrow
-            onPress={() => setStep('signup')}
+            onPress={() => (editing ? finish(true) : setStep('signup'))}
           />
           <GhostButton
             label="Adjust my answers"
@@ -946,8 +965,8 @@ export function OnboardingFlow({ onExit, onDone }: Props) {
         </View>
 
         <View style={[styles.gap10, styles.mt18]}>
-          <SsoButton provider="apple" onPress={finish} />
-          <SsoButton provider="google" onPress={finish} />
+          <SsoButton provider="apple" onPress={() => finish(true)} />
+          <SsoButton provider="google" onPress={() => finish(true)} />
         </View>
         <OrDivider />
         <LineField
@@ -1001,7 +1020,7 @@ export function OnboardingFlow({ onExit, onDone }: Props) {
         <PrimaryButton
           label="Create account"
           disabled={!(emailOk && pwOk)}
-          onPress={finish}
+          onPress={() => finish(true)}
         />
         <GhostButton
           label="Skip for now"
@@ -1049,7 +1068,7 @@ export function OnboardingFlow({ onExit, onDone }: Props) {
                 color={colors.ink2}
                 onPress={() => {
                   setSkipOpen(false);
-                  finish();
+                  finish(false);
                 }}
               />
             </View>

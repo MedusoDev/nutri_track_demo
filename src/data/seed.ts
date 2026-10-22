@@ -20,10 +20,39 @@ export function createSeedState(_today: string): AppState {
     profile: null,
     entries: [],
     foods: FOODS,
-    favorites: ['chicken', 'oatmeal', 'banana', 'yogurt'],
+    favorites: [], // a new user has not picked any yet
     water: {},
     goals: DEFAULT_GOALS,
     theme: 'light',
     name: 'Gabriel',
+    weights: {},
+    units: 'kg',
+    reminders: [
+      {
+        id: 'breakfast',
+        label: 'Log breakfast',
+        schedule: 'Every day · 08:00',
+        on: true,
+      },
+      {
+        id: 'lunch',
+        label: 'Log lunch',
+        schedule: 'Every day · 12:30',
+        on: true,
+      },
+      {
+        id: 'dinner',
+        label: 'Log dinner',
+        schedule: 'Every day · 19:30',
+        on: false,
+      },
+      {
+        id: 'water',
+        label: 'Drink water',
+        schedule: 'Every 2 hours · 09:00–19:00',
+        on: true,
+      },
+    ],
+    hasAccount: false,
   };
 }

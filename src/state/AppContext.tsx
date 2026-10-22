@@ -10,17 +10,36 @@ import {
   useState,
 } from 'react';
 import { createSeedState } from '../data/seed';
-import { AppState } from '../types';
+import { FOODS } from '../data/foods';
+import { AppState, Food } from '../types';
 import { toDateKey } from '../utils/date';
 import { Action, reducer } from './reducer';
 
-const STORAGE_KEY = 'nutritrack:v3'; // v3 = starts empty, goals come from the onboarding
+const STORAGE_KEY = 'nutritrack:v4'; // v4 = foods with grams, weights, reminders (sections 04-09)
 
 interface ContextValue {
   state: AppState;
   dispatch: Dispatch<Action>;
   today: string;
   ready: boolean;
+}
+
+/**
+ * Built-in foods always come from the current list (data/foods.ts); the user's own foods
+ * are kept, and any saved food without grams gets them from its serving text.
+ */
+function migrate(state: AppState): AppState {
+  const builtIn = new Set(FOODS.map(f => f.id));
+  const own = state.foods.filter(f => f.custom && !builtIn.has(f.id));
+  const grams = (f: Food) => f.servingGrams || parseFloat(f.serving) || 100;
+  return {
+    ...state,
+    foods: [...FOODS, ...own.map(f => ({ ...f, servingGrams: grams(f) }))],
+    entries: state.entries.map(e => ({
+      ...e,
+      food: { ...e.food, servingGrams: grams(e.food) },
+    })),
+  };
 }
 
 const AppContext = createContext<ContextValue | null>(null);
@@ -35,21 +54,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     AsyncStorage.getItem(STORAGE_KEY)
       .then(saved => {
         if (saved) {
-          dispatch({ type: 'hydrate', state: JSON.parse(saved) });
+          // Fields added in later versions get their default value.
+          dispatch({
+            type: 'hydrate',
+            state: migrate({ ...createSeedState(today), ...JSON.parse(saved) }),
+          });
         }
       })
       .catch(() => {})
       .finally(() => setReady(true));
-  }, []);
+  }, [today]);
 
-  // 2. After loading, save every change so data survives closing the app.
+  // 2. After loading, save changes so data survives closing the app. Saving waits until the
+  //    700 ms animations are done: stringifying months of history mid-animation made it stutter.
   useEffect(() => {
-    if (ready) {
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => {});
+    if (!ready) {
+      return;
     }
+    const timer = setTimeout(() => {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => {});
+    }, 800);
+    return () => clearTimeout(timer);
   }, [state, ready]);
 
-  const value = useMemo(() => ({ state, dispatch, today, ready }), [state, today, ready]);
+  const value = useMemo(
+    () => ({ state, dispatch, today, ready }),
+    [state, today, ready],
+  );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

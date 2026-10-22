@@ -1,15 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { BackHandler, StatusBar, StyleSheet, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Body, Display, GhostButton, Overline, Slide } from './src/components/kit';
-import { createSeedState } from './src/data/seed';
-import { ForgotPasswordScreen } from './src/screens/onboarding/ForgotPasswordScreen';
-import { LoginScreen } from './src/screens/onboarding/LoginScreen';
-import { OnboardingFlow } from './src/screens/onboarding/OnboardingFlow';
-import { WelcomeScreen } from './src/screens/onboarding/WelcomeScreen';
-import { SplashScreen } from './src/screens/SplashScreen';
-import { AppProvider, useApp } from './src/state/AppContext';
-import { fixed, useColors } from './src/theme';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BackHandler, StatusBar, StyleSheet, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  Body,
+  Display,
+  GhostButton,
+  Overline,
+  Slide,
+} from "./src/components/kit";
+import { createSeedState } from "./src/data/seed";
+import { ForgotPasswordScreen } from "./src/screens/onboarding/ForgotPasswordScreen";
+import { LoginScreen } from "./src/screens/onboarding/LoginScreen";
+import { OnboardingFlow } from "./src/screens/onboarding/OnboardingFlow";
+import { WelcomeScreen } from "./src/screens/onboarding/WelcomeScreen";
+import { SplashScreen } from "./src/screens/SplashScreen";
+import { AppProvider, useApp } from "./src/state/AppContext";
+import { fixed, useColors } from "./src/theme";
 
 /** The Today screen is being rebuilt with the new design: for now, show the saved plan. */
 function PlanSaved() {
@@ -17,31 +23,37 @@ function PlanSaved() {
   const colors = useColors();
   const { goals } = state;
   return (
-    <View style={[styles.container, styles.center, { backgroundColor: colors.bg }]}>
+    <View
+      style={[styles.container, styles.center, { backgroundColor: colors.bg }]}
+    >
       <StatusBar barStyle="dark-content" />
       <Overline>Your plan is saved</Overline>
       <Display size={52} style={styles.gap}>
-        {goals.calories.toLocaleString('en-US')} kcal
+        {goals.calories.toLocaleString("en-US")} kcal
       </Display>
       <Body style={styles.gap}>
-        Protein {goals.protein} g · Carbs {goals.carbs} g · Fat {goals.fat} g · Water{' '}
-        {goals.water * 0.25} L
+        Protein {goals.protein} g · Carbs {goals.carbs} g · Fat {goals.fat} g ·
+        Water {goals.water * 0.25} L
       </Body>
-      <Body style={styles.gap}>The Today screen with the new design comes next.</Body>
+      <Body style={styles.gap}>
+        The Today screen with the new design comes next.
+      </Body>
       <GhostButton
         label="Start over"
-        onPress={() => dispatch({ type: 'reset', state: createSeedState(today) })}
+        onPress={() =>
+          dispatch({ type: "reset", state: createSeedState(today) })
+        }
       />
     </View>
   );
 }
 
-type AuthRoute = 'welcome' | 'onboarding' | 'login' | 'forgot';
+type AuthRoute = "welcome" | "onboarding" | "login" | "forgot";
 
 /** Welcome -> onboarding, or Welcome -> Login (-> Forgot password). */
 function AuthFlow() {
   const { dispatch } = useApp();
-  const [route, setRoute] = useState<AuthRoute>('welcome');
+  const [route, setRoute] = useState<AuthRoute>("welcome");
 
   // Welcome is the start; going back to it slides in from the left.
   const prevRoute = useRef(route);
@@ -53,13 +65,13 @@ function AuthFlow() {
   }
 
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (route === 'login') {
-        setRoute('welcome');
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (route === "login") {
+        setRoute("welcome");
         return true;
       }
-      if (route === 'forgot') {
-        setRoute('login');
+      if (route === "forgot") {
+        setRoute("login");
         return true;
       }
       return false; // welcome closes the app; onboarding handles its own steps
@@ -67,38 +79,43 @@ function AuthFlow() {
     return () => sub.remove();
   }, [route]);
 
-  const light = route === 'welcome';
+  const light = route === "welcome";
   return (
     <>
-      <StatusBar barStyle={light ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle={light ? "light-content" : "dark-content"} />
       <Slide
         key={route}
-        dir={route === 'welcome' && dir.current === 1 ? 0 : dir.current}
+        dir={route === "welcome" && dir.current === 1 ? 0 : dir.current}
       >
-        {route === 'welcome' && (
+        {route === "welcome" && (
           <WelcomeScreen
-            onGetStarted={() => setRoute('onboarding')}
-            onLogIn={() => setRoute('login')}
+            onGetStarted={() => setRoute("onboarding")}
+            onLogIn={() => setRoute("login")}
           />
         )}
-        {route === 'onboarding' && (
+        {route === "onboarding" && (
           <OnboardingFlow
-            onExit={() => setRoute('welcome')}
-            onDone={(profile, goals) =>
-              dispatch({ type: 'completeOnboarding', profile, goals })
+            onExit={() => setRoute("welcome")}
+            onDone={(profile, goals, hasAccount) =>
+              dispatch({
+                type: "completeOnboarding",
+                profile,
+                goals,
+                hasAccount,
+              })
             }
           />
         )}
-        {route === 'login' && (
+        {route === "login" && (
           <LoginScreen
-            onBack={() => setRoute('welcome')}
-            onLoggedIn={() => dispatch({ type: 'logIn' })}
-            onForgot={() => setRoute('forgot')}
-            onGetStarted={() => setRoute('onboarding')}
+            onBack={() => setRoute("welcome")}
+            onLoggedIn={() => dispatch({ type: "logIn" })}
+            onForgot={() => setRoute("forgot")}
+            onGetStarted={() => setRoute("onboarding")}
           />
         )}
-        {route === 'forgot' && (
-          <ForgotPasswordScreen onBack={() => setRoute('login')} />
+        {route === "forgot" && (
+          <ForgotPasswordScreen onBack={() => setRoute("login")} />
         )}
       </Slide>
     </>
@@ -121,7 +138,7 @@ function Root() {
     const minimum = state.onboarded ? 1700 : 2600;
     const timer = setTimeout(
       () => setCanExit(true),
-      Math.max(0, minimum - (Date.now() - startedAt)),
+      Math.max(0, minimum - (Date.now() - startedAt))
     );
     return () => clearTimeout(timer);
   }, [ready, state.onboarded, startedAt]);
@@ -161,7 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   center: {
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   gap: {

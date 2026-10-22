@@ -1,4 +1,4 @@
-import { ViewStyle } from 'react-native';
+import { useColorScheme, ViewStyle } from 'react-native';
 import { useApp } from './state/AppContext';
 import { ThemeMode } from './types';
 
@@ -23,6 +23,10 @@ const light = {
   fat: '#437F7D',
   water: '#3F6F8C',
   waterSoft: '#DCE8EC',
+  proteinSoft: '#EBD3D9',
+  carbsSoft: '#F1E2B8',
+  fatSoft: '#CFE3E1',
+  onAccent: '#FFF8F0',
   shadow: '#1F2A21',
   overlay: 'rgba(18, 26, 20, 0.5)',
 
@@ -58,6 +62,10 @@ const dark: Colors = {
   fat: '#7FC0BB',
   water: '#8DBBD6',
   waterSoft: '#1E3039',
+  proteinSoft: '#3A2830',
+  carbsSoft: '#3A3320',
+  fatSoft: '#1F3836',
+  onAccent: '#FFF8F0',
   shadow: '#000000',
   overlay: 'rgba(0, 0, 0, 0.6)',
 
@@ -70,7 +78,7 @@ const dark: Colors = {
   danger: '#E69063',
 };
 
-export const palettes: Record<ThemeMode, Colors> = { dark, light };
+export const palettes: Record<'light' | 'dark', Colors> = { dark, light };
 
 /** Colors that do not change with the theme (splash, welcome, toast, logo). */
 export const fixed = {
@@ -126,7 +134,14 @@ export const overline = {
   textTransform: 'uppercase' as const,
 };
 
-export function useColors(): Colors {
+/** True when the app is dark: chosen in Settings, or following the phone ("system"). */
+export function useIsDark(): boolean {
   const { state } = useApp();
-  return palettes[state.theme];
+  const scheme = useColorScheme();
+  const mode: ThemeMode = state.theme;
+  return mode === 'system' ? scheme === 'dark' : mode === 'dark';
+}
+
+export function useColors(): Colors {
+  return palettes[useIsDark() ? 'dark' : 'light'];
 }
