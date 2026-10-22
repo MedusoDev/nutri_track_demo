@@ -1,39 +1,41 @@
 # nutri_track_demo
 
-A nutrition dashboard screen ("NutriTrack") built with React Native CLI and TypeScript, using mock data. It recreates a design mockup as a coding challenge.
+Demo of **Nutri Track**, a calm calorie and macro tracker built with React Native CLI and TypeScript.
+It started as a coding challenge (recreate a nutrition dashboard mockup) and is now being rebuilt with a new design, part by part.
 
-**Version 0.1.0**
+**Version 0.2.0** · new design, work in progress
 
-<img src="docs/screenshot.png" alt="NutriTrack dashboard running on Android" width="320">
+<img src="docs/welcome.png" alt="Nutri Track welcome screen: a plate with three macro leaves" width="320">
 
-## What's in it
+## What's in this demo
 
-- **Header**: today's date, the app name and logo.
-- **Tabs**: Today, History, Foods and Settings (only Today has content for now).
-- **Daily calorie ring**: calories left and the percentage of the daily goal.
-- **Macro bars**: protein, carbs and fat progress against their goals.
-- **Meals list**: meal cards with time, description and calories.
-- **Add Meal / Log Food**: adds a meal to the list and the ring updates right away.
-
-## About the mockup
-
-The original mockup shows Carbs twice and Protein without a progress bar. This version shows all three macros (protein, carbs, fat), each with its own bar.
+- **Splash**: the logo animates in: a plate rises and three leaves (protein, carbs, fat) sprout from it.
+- **Onboarding**: goal, body data and pace. The app calculates the daily calories, macros and water target (Mifflin–St Jeor) and shows how it got there.
+- **Today**: calories left with a leaf that fills up, macro bars, a water tracker and the day's meals.
+- **Log food**: pick the meal and the time, add several foods to a list and log them all at once, with undo.
+- **History, Foods and Settings** tabs.
 
 ## Stack
 
-- TypeScript + React Native CLI (no Expo)
-- react-native-svg for the calorie ring
+- TypeScript + React Native CLI
+- react-native-svg for the logo, leaf and icons
+- AsyncStorage to keep the data on the phone
 - Local mock data (no backend)
+- Jest for the unit tests
 
 ## Project structure
 
 ```
+App.tsx               splash -> onboarding -> tabs
 src/
-  types.ts          data shapes (Macro, Meal, Tab)
-  data/mock.ts      mock data (calorie goal, macros, meals, tabs)
-  theme.ts          colors and spacing
-  screens/          DashboardScreen: holds the state and composes the screen
-  components/       Header, TabBar, CalorieRing, MacroBar, MealCard, AddMealCard, LogFoodButton
+  theme.ts            design tokens (light and dark), fonts
+  types.ts            data shapes
+  data/               food list and first-launch state
+  state/              app state (reducer + context + local storage)
+  utils/              nutrition maths and the daily target calculation
+  components/         UI kit, logo, tab bar, toast...
+  screens/            Splash, onboarding, Today, History, Foods, Settings
+__tests__/            unit tests
 ```
 
 ## How to run
@@ -44,8 +46,21 @@ Requires Node 22+, JDK 17 and Android Studio with an emulator running.
 git clone https://github.com/MedusoDev/nutri_track_demo.git
 cd nutri_track_demo
 npm install
+```
+
+Start Metro in one terminal and wait until it is ready:
+
+```bash
+npm start
+```
+
+Then, in a second terminal, build and open the app on the emulator:
+
+```bash
 npm run android
 ```
+
+Run the tests with `npm test`.
 
 ---
 
