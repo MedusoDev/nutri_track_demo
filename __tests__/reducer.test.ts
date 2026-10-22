@@ -112,6 +112,34 @@ describe('new actions', () => {
   });
 });
 
+describe('demo history', () => {
+  const { buildDemoHistory } = require('../src/data/demo');
+  const goals = {
+    calories: 2400,
+    protein: 150,
+    carbs: 270,
+    fat: 80,
+    water: 10,
+  };
+
+  test('covers about two months, ends with a 12-day streak and weight going down', () => {
+    const demo = buildDemoHistory(TODAY, goals, 76, 'lose');
+    const days = Object.keys(demo.water);
+    expect(days.length).toBeGreaterThan(48);
+    const { streakDays } = require('../src/utils/nutrition');
+    expect(streakDays(demo.entries, TODAY)).toBeGreaterThanOrEqual(13);
+    const weighIns = Object.keys(demo.weights).sort();
+    expect(demo.weights[weighIns[weighIns.length - 1]]).toBe(76);
+    expect(demo.weights[weighIns[0]]).toBeGreaterThan(77);
+  });
+
+  test('is the same every time', () => {
+    expect(buildDemoHistory(TODAY, goals, 76, 'maintain')).toEqual(
+      buildDemoHistory(TODAY, goals, 76, 'maintain'),
+    );
+  });
+});
+
 test('new user keeps the plan and clears the log', () => {
   const profile = {
     goal: 'maintain' as const,
@@ -134,4 +162,17 @@ test('new user keeps the plan and clears the log', () => {
   expect(state.entries).toHaveLength(0);
   expect(state.profile).toBe(profile);
   expect(state.weights).toEqual({ [TODAY]: 76 });
+});
+
+test('a new user has no favourites or own recipes; the 2-month demo has both', () => {
+  expect(initial.favorites).toEqual([]);
+  expect(initial.foods.some(f => f.custom)).toBe(false);
+  const { buildDemoHistory } = require('../src/data/demo');
+  const demo = buildDemoHistory(TODAY, initial.goals, 76, 'lose');
+  const state = reducer(initial, { type: 'loadDemo', ...demo });
+  expect(state.favorites.length).toBeGreaterThan(0);
+  expect(state.foods.filter(f => f.custom).length).toBe(3);
+  const back = reducer(state, { type: 'newUser', today: TODAY });
+  expect(back.favorites).toEqual([]);
+  expect(back.foods.some(f => f.custom)).toBe(false);
 });

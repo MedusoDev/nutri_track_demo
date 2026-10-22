@@ -5,7 +5,6 @@ import {
   Easing,
   StatusBar,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import {
@@ -26,11 +25,12 @@ import { ForgotPasswordScreen } from './src/screens/onboarding/ForgotPasswordScr
 import { LoginScreen } from './src/screens/onboarding/LoginScreen';
 import { OnboardingFlow } from './src/screens/onboarding/OnboardingFlow';
 import { WelcomeScreen } from './src/screens/onboarding/WelcomeScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { TodayScreen } from './src/screens/TodayScreen';
 import { AppProvider, useApp } from './src/state/AppContext';
 import { Nav, NavContext, PlateItem, Route } from './src/state/nav';
-import { fixed, fonts, useColors, useIsDark } from './src/theme';
+import { fixed, useColors, useIsDark } from './src/theme';
 import { Entry, Food, MealType, TabKey } from './src/types';
 import { entryNutrition, mealForNow } from './src/utils/nutrition';
 
@@ -243,7 +243,7 @@ function Main() {
           )}
           {tab === 'history' && <HistoryScreen />}
           {tab === 'foods' && <FoodsScreen />}
-          {tab === 'settings' && <ComingNext title="Settings" />}
+          {tab === 'settings' && <SettingsScreen />}
         </Animated.View>
 
         <TabBar
@@ -330,21 +330,6 @@ function Main() {
         );
     }
   }
-}
-
-/** Placeholder for a tab that lands in a later commit. */
-function ComingNext({ title }: { title: string }) {
-  const colors = useColors();
-  return (
-    <View
-      style={[styles.container, styles.coming, { backgroundColor: colors.bg }]}
-    >
-      <Text style={[styles.comingTitle, { color: colors.ink }]}>{title}</Text>
-      <Text style={[styles.comingText, { color: colors.ink2 }]}>
-        Coming in the next update.
-      </Text>
-    </View>
-  );
 }
 
 type AuthRoute = 'welcome' | 'onboarding' | 'login' | 'forgot';
@@ -473,20 +458,6 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  coming: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-  },
-  comingTitle: {
-    fontFamily: fonts.display,
-    fontSize: 34,
-  },
-  comingText: {
-    marginTop: 6,
-    fontFamily: fonts.sans,
-    fontSize: 15,
   },
   sheet: {
     overflow: 'hidden',
