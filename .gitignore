@@ -73,3 +73,9 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Design handoff local (não vai para o repositório)
+new-design/
+
+# Feedback local do usuário (prints, não vai para o repositório)
+feedback/
