@@ -1,52 +1,53 @@
-import { AppState } from "../src/types";
-import { createSeedState } from "../src/data/seed";
-import { reducer } from "../src/state/reducer";
+import { AppState } from '../src/types';
+import { createSeedState } from '../src/data/seed';
+import { reducer } from '../src/state/reducer';
+import { macroCheck, validateFood } from '../src/utils/foodForm';
 
-const TODAY = "2026-10-22";
+const TODAY = '2026-10-22';
 const initial = createSeedState(TODAY);
 
-describe("reducer", () => {
-  test("adds, updates and removes an entry", () => {
+describe('reducer', () => {
+  test('adds, updates and removes an entry', () => {
     const food = initial.foods[0];
     let state = reducer(initial, {
-      type: "addEntry",
-      entry: { id: "new", date: TODAY, meal: "dinner", servings: 1, food },
+      type: 'addEntry',
+      entry: { id: 'new', date: TODAY, meal: 'dinner', servings: 1, food },
     });
     expect(state.entries).toHaveLength(initial.entries.length + 1);
 
     state = reducer(state, {
-      type: "updateEntry",
-      id: "new",
+      type: 'updateEntry',
+      id: 'new',
       changes: { servings: 3 },
     });
-    expect(state.entries.find((e) => e.id === "new")!.servings).toBe(3);
+    expect(state.entries.find(e => e.id === 'new')!.servings).toBe(3);
 
-    state = reducer(state, { type: "removeEntry", id: "new" });
+    state = reducer(state, { type: 'removeEntry', id: 'new' });
     expect(state.entries).toHaveLength(initial.entries.length);
   });
 
-  test("does not mutate the previous state", () => {
+  test('does not mutate the previous state', () => {
     const before = JSON.stringify(initial);
-    reducer(initial, { type: "setWater", date: TODAY, glasses: 7 });
+    reducer(initial, { type: 'setWater', date: TODAY, glasses: 7 });
     expect(JSON.stringify(initial)).toBe(before);
   });
 
-  test("toggles favorites", () => {
-    const on = reducer(initial, { type: "toggleFavorite", id: "salmon" });
-    expect(on.favorites).toContain("salmon");
-    const off = reducer(on, { type: "toggleFavorite", id: "salmon" });
-    expect(off.favorites).not.toContain("salmon");
+  test('toggles favorites', () => {
+    const on = reducer(initial, { type: 'toggleFavorite', id: 'salmon' });
+    expect(on.favorites).toContain('salmon');
+    const off = reducer(on, { type: 'toggleFavorite', id: 'salmon' });
+    expect(off.favorites).not.toContain('salmon');
   });
 
-  test("removing a food also removes it from favorites", () => {
-    const state = reducer(initial, { type: "removeFood", id: "chicken" });
-    expect(state.foods.some((f) => f.id === "chicken")).toBe(false);
-    expect(state.favorites).not.toContain("chicken");
+  test('removing a food also removes it from favorites', () => {
+    const state = reducer(initial, { type: 'removeFood', id: 'chicken' });
+    expect(state.foods.some(f => f.id === 'chicken')).toBe(false);
+    expect(state.favorites).not.toContain('chicken');
   });
 
-  test("water never goes below zero", () => {
+  test('water never goes below zero', () => {
     const state = reducer(initial, {
-      type: "setWater",
+      type: 'setWater',
       date: TODAY,
       glasses: -1,
     });
@@ -54,31 +55,67 @@ describe("reducer", () => {
   });
 });
 
-describe("new actions", () => {
-  test("logs several entries at once and keeps the weight", () => {
-    const food = initial.foods[0];
-    let state = reducer(initial, {
-      type: "addEntries",
-      entries: [
-        { id: "a", date: TODAY, meal: "lunch", servings: 1, food },
-        { id: "b", date: TODAY, meal: "lunch", servings: 2, food },
-      ],
-    });
-    expect(state.entries).toHaveLength(2);
-    state = reducer(state, { type: "setWeight", date: TODAY, kg: 75.4 });
-    expect(state.weights[TODAY]).toBe(75.4);
+describe('food form validation', () => {
+  const valid = {
+    name: 'Tapioca',
+    servingSize: '180',
+    calories: '295',
+    protein: '11',
+    carbs: '38',
+    fat: '11',
+  };
+
+  test('accepts a valid food', () => {
+    expect(validateFood(valid)).toEqual({});
   });
 
-  test("toggles a reminder", () => {
-    const state = reducer(initial, { type: "toggleReminder", id: "dinner" });
-    expect(state.reminders.find((r) => r.id === "dinner")!.on).toBe(true);
+  test('rejects short names, empty serving and invalid numbers', () => {
+    const errors = validateFood({
+      ...valid,
+      name: 'A',
+      servingSize: '',
+      protein: 'abc',
+      calories: '-5',
+    });
+    expect(Object.keys(errors).sort()).toEqual([
+      'calories',
+      'name',
+      'protein',
+      'servingSize',
+    ]);
+  });
+
+  test('checks that the macros match the calories within 10%', () => {
+    expect(macroCheck(valid)).toEqual({ fromMacros: 295, matches: true });
+    expect(macroCheck({ ...valid, calories: '200' }).matches).toBe(false);
   });
 });
 
-test("new user keeps the plan and clears the log", () => {
+describe('new actions', () => {
+  test('logs several entries at once and keeps the weight', () => {
+    const food = initial.foods[0];
+    let state = reducer(initial, {
+      type: 'addEntries',
+      entries: [
+        { id: 'a', date: TODAY, meal: 'lunch', servings: 1, food },
+        { id: 'b', date: TODAY, meal: 'lunch', servings: 2, food },
+      ],
+    });
+    expect(state.entries).toHaveLength(2);
+    state = reducer(state, { type: 'setWeight', date: TODAY, kg: 75.4 });
+    expect(state.weights[TODAY]).toBe(75.4);
+  });
+
+  test('toggles a reminder', () => {
+    const state = reducer(initial, { type: 'toggleReminder', id: 'dinner' });
+    expect(state.reminders.find(r => r.id === 'dinner')!.on).toBe(true);
+  });
+});
+
+test('new user keeps the plan and clears the log', () => {
   const profile = {
-    goal: "maintain" as const,
-    sex: "male" as const,
+    goal: 'maintain' as const,
+    sex: 'male' as const,
     age: 29,
     heightCm: 178,
     weightKg: 76,
@@ -90,10 +127,10 @@ test("new user keeps the plan and clears the log", () => {
     ...initial,
     profile,
     entries: [
-      { id: "x", date: TODAY, meal: "lunch" as const, servings: 1, food },
+      { id: 'x', date: TODAY, meal: 'lunch' as const, servings: 1, food },
     ],
   };
-  state = reducer(state, { type: "newUser", today: TODAY });
+  state = reducer(state, { type: 'newUser', today: TODAY });
   expect(state.entries).toHaveLength(0);
   expect(state.profile).toBe(profile);
   expect(state.weights).toEqual({ [TODAY]: 76 });

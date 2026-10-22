@@ -16,6 +16,8 @@ import { Slide } from './src/components/kit';
 import { TAB_BAR_HEIGHT, TabBar } from './src/components/TabBar';
 import { Toast, ToastMessage } from './src/components/Toast';
 import { MEALS } from './src/data/foods';
+import { CreateFoodScreen } from './src/screens/foods/CreateFoodScreen';
+import { FoodsScreen } from './src/screens/foods/FoodsScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { FoodDetailScreen } from './src/screens/log/FoodDetailScreen';
 import { LogFoodScreen } from './src/screens/log/LogFoodScreen';
@@ -89,13 +91,6 @@ function Main() {
     const label = (meal: MealType) => MEALS.find(m => m.key === meal)!.label;
     return {
       push: route => {
-        if (route.name === 'createFood') {
-          setToast({
-            id: Date.now(),
-            title: 'New food comes in the next update',
-          });
-          return;
-        }
         // A new Log food starts with an empty plate.
         if (route.name === 'logFood') {
           setPlate([]);
@@ -247,7 +242,7 @@ function Main() {
             <TodayScreen date={today} highlight={highlight} />
           )}
           {tab === 'history' && <HistoryScreen />}
-          {tab === 'foods' && <ComingNext title="Foods" />}
+          {tab === 'foods' && <FoodsScreen />}
           {tab === 'settings' && <ComingNext title="Settings" />}
         </Animated.View>
 
@@ -320,6 +315,8 @@ function Main() {
         );
       case 'mealDetail':
         return <MealDetailScreen meal={route.meal} date={route.date} />;
+      case 'createFood':
+        return <CreateFoodScreen />;
       case 'day':
         return <TodayScreen date={route.date} highlight={flash} />;
       case 'editProfile':
